@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using WasteGlassApi.Data;
 using WasteGlassApi.Services;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Database — Supabase PostgreSQL (set via env var or appsettings)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? "Host=localhost;Database=waste_glass;Username=postgres;Password=password";
+
+// ADD THIS LINE - Log the connection string (hide password)
+Console.WriteLine($"[DEBUG] Using connection string: {connectionString.Replace(connectionString.Split(';').FirstOrDefault(s => s.StartsWith("Password=")) ?? "", "Password=***")}");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
