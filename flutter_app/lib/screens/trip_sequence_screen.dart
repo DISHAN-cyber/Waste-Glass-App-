@@ -24,41 +24,54 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
   }
 
   Future<void> _loadRoute() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final suppliers = await ApiService.getRoute();
       await LocalDbService().saveTripStart(DateTime.now());
       double total = 0;
-      for (final s in suppliers) { total += s.distanceFromPrev; }
+      for (final s in suppliers) {
+        total += s.distanceFromPrev;
+      }
       setState(() {
         _suppliers = suppliers;
         _totalDistance = total;
         _loading = false;
       });
     } catch (e) {
-      setState(() { _error = e.toString(); _loading = false; });
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
   int get _remainingStops =>
       _suppliers.where((s) => s.status != 'Collected').length;
 
-  int get _currentStopIndex =>
-      _suppliers.indexWhere((s) => s.status == 'Next');
+  int get _currentStopIndex => _suppliers.indexWhere((s) => s.status == 'Next');
 
   Color _statusColor(String status) {
     switch (status) {
-      case 'Collected': return Colors.green;
-      case 'Next': return const Color(0xFF1565C0);
-      default: return Colors.grey;
+      case 'Collected':
+        return Colors.green;
+      case 'Next':
+        return const Color(0xFF1565C0);
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _statusIcon(String status) {
     switch (status) {
-      case 'Collected': return Icons.check_circle;
-      case 'Next': return Icons.navigation;
-      default: return Icons.radio_button_unchecked;
+      case 'Collected':
+        return Icons.check_circle;
+      case 'Next':
+        return Icons.navigation;
+      default:
+        return Icons.radio_button_unchecked;
     }
   }
 
@@ -102,9 +115,12 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
           children: [
             const Icon(Icons.wifi_off, size: 56, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('Could not load route', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height(8)),
-            Text(_error!, style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
+            Text('Could not load route',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(_error!,
+                style: const TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _loadRoute,
@@ -127,7 +143,8 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               itemCount: _suppliers.length,
-              itemBuilder: (context, index) => _buildStopCard(_suppliers[index], index),
+              itemBuilder: (context, index) =>
+                  _buildStopCard(_suppliers[index], index),
             ),
           ),
         ),
@@ -141,7 +158,8 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       child: Row(
         children: [
-          _statChip(Icons.route, '${_totalDistance.toStringAsFixed(1)} km', 'Total distance'),
+          _statChip(Icons.route, '${_totalDistance.toStringAsFixed(1)} km',
+              'Total distance'),
           const SizedBox(width: 16),
           _statChip(Icons.location_on, '$_remainingStops', 'Stops remaining'),
           const SizedBox(width: 16),
@@ -164,7 +182,8 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
             Icon(icon, size: 18, color: const Color(0xFF1565C0)),
             const SizedBox(height: 4),
             Text(value,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
             Text(label,
                 style: const TextStyle(fontSize: 10, color: Colors.grey),
                 textAlign: TextAlign.center),
@@ -221,10 +240,12 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
             const SizedBox(height: 4),
             Row(
               children: [
-                _pill('${supplier.expectedKg} kg expected', Colors.orange.shade100, Colors.orange.shade800),
+                _pill('${supplier.expectedKg} kg expected',
+                    Colors.orange.shade100, Colors.orange.shade800),
                 const SizedBox(width: 6),
                 if (supplier.distanceFromPrev > 0)
-                  _pill('${supplier.distanceFromPrev.toStringAsFixed(1)} km', Colors.grey.shade100, Colors.grey.shade700),
+                  _pill('${supplier.distanceFromPrev.toStringAsFixed(1)} km',
+                      Colors.grey.shade100, Colors.grey.shade700),
               ],
             ),
           ],
@@ -232,7 +253,8 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(_statusIcon(supplier.status), color: _statusColor(supplier.status)),
+            Icon(_statusIcon(supplier.status),
+                color: _statusColor(supplier.status)),
             const SizedBox(height: 2),
             Text(
               supplier.status,
@@ -244,9 +266,7 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
             ),
           ],
         ),
-        onTap: isNext
-            ? () => _goToScan(supplier)
-            : null,
+        onTap: isNext ? () => _goToScan(supplier) : null,
       ),
     );
   }
@@ -254,8 +274,11 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
   Widget _pill(String text, Color bg, Color fg) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(text, style: TextStyle(fontSize: 11, color: fg, fontWeight: FontWeight.w500)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(text,
+          style:
+              TextStyle(fontSize: 11, color: fg, fontWeight: FontWeight.w500)),
     );
   }
 
@@ -270,11 +293,13 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
             minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           onPressed: () => Navigator.pushNamed(context, '/report'),
           icon: const Icon(Icons.summarize),
-          label: const Text('View Trip Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          label: const Text('View Trip Report',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         ),
       );
     }
@@ -287,7 +312,8 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
           backgroundColor: const Color(0xFF1565C0),
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onPressed: () => _goToScan(_suppliers[nextIndex]),
         icon: const Icon(Icons.qr_code_scanner),
