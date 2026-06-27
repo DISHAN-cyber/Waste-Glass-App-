@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/supplier.dart';
 
 class ApiService {
-  // TODO: Replace with your hosted backend URL before building APK
-  static const String baseUrl = 'https://YOUR_BACKEND_URL';
+  static const String baseUrl =
+      'https://fabulous-vitality-production-26cf.up.railway.app';
 
   static Future<List<Supplier>> getRoute() async {
     final response = await http
@@ -20,27 +20,50 @@ class ApiService {
   }
 
   static Future<void> submitCollection(CollectionRecord record) async {
-    final response = await http
-        .post(
-          Uri.parse('$baseUrl/api/collection/${record.supplierId}'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode(record.toJson()),
-        )
-        .timeout(const Duration(seconds: 15));
+    final url = Uri.parse('$baseUrl/api/collection/${record.supplierId}');
+    final body = json.encode(record.toJson());
+    
+    print('🌐 Sending POST to: $url');
+    print('📦 Request body: $body');
+    
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          )
+          .timeout(const Duration(seconds: 15));
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Failed to submit collection: ${response.statusCode}');
+      print('📥 Response status: ${response.statusCode}');
+      print('📥 Response body: ${response.body}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Failed to submit: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('❌ API Error: $e');
+      rethrow;
     }
   }
 
   static Future<void> syncAll(List<CollectionRecord> records) async {
+    final url = Uri.parse('$baseUrl/api/collection/sync');
+    final body = json.encode(records.map((r) => r.toJson()).toList());
+    
+    print('🌐 Sending sync POST to: $url');
+    print('📦 Sync body: $body');
+    
     final response = await http
         .post(
-          Uri.parse('$baseUrl/api/collection/sync'),
+          url,
           headers: {'Content-Type': 'application/json'},
-          body: json.encode(records.map((r) => r.toJson()).toList()),
+          body: body,
         )
         .timeout(const Duration(seconds: 30));
+
+    print('📥 Sync response: ${response.statusCode}');
+    print('📥 Sync body: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Sync failed: ${response.statusCode}');
