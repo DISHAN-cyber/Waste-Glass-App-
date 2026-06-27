@@ -90,7 +90,6 @@ This application streamlines the waste glass collection process by providing col
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/DISHAN-cyber/Waste-Glass-App-.git
-cd Waste-Glass-App-/dotnet_backend
 ````
 
 ---
