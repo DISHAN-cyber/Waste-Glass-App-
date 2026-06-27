@@ -19,3 +19,8 @@ dotnet_backend/appsettings.Development.json
 # General
 .DS_Store
 *.log
+"build/" 
+".dart_tool/" 
+".flutter-temp/" 
+"*.iml" 
+".gradle/" 
