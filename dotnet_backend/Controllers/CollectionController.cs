@@ -23,30 +23,41 @@ public class CollectionController : ControllerBase
         string supplierId,
         [FromBody] CollectionSubmitDto dto)
     {
-        var supplier = await _db.Suppliers
-            .FirstOrDefaultAsync(s => s.BarcodeRef == supplierId);
-
-        if (supplier == null)
-            return NotFound(new { error = $"Supplier '{supplierId}' not found." });
-
-        // Update supplier status to Collected
-        supplier.Status = "Collected";
-
-        // Save collection record
-        var record = new CollectionRecord
+        try
         {
-            SupplierId = supplierId,
-            ClearKg = dto.ClearKg,
-            ColouredKg = dto.ColouredKg,
-            Condition = dto.Condition,
-            Timestamp = dto.Timestamp == default ? DateTime.UtcNow : dto.Timestamp,
-            Synced = true,
-        };
+            var supplier = await _db.Suppliers
+                .FirstOrDefaultAsync(s => s.BarcodeRef == supplierId);
 
-        _db.CollectionRecords.Add(record);
-        await _db.SaveChangesAsync();
+            if (supplier == null)
+                return NotFound(new { error = $"Supplier '{supplierId}' not found." });
 
-        return Ok(new { message = "Collection recorded", supplierId, status = "Collected" });
+            // Update supplier status to Collected
+            supplier.Status = "Collected";
+
+            // Save collection record - FIX: Always use UTC DateTime
+            var timestamp = dto.Timestamp == default 
+                ? DateTime.UtcNow 
+                : DateTime.SpecifyKind(dto.Timestamp, DateTimeKind.Utc);
+
+            var record = new CollectionRecord
+            {
+                SupplierId = supplierId,
+                ClearKg = dto.ClearKg,
+                ColouredKg = dto.ColouredKg,
+                Condition = dto.Condition,
+                Timestamp = timestamp,
+                Synced = true,
+            };
+
+            _db.CollectionRecords.Add(record);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Collection recorded", supplierId, status = "Collected" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+        }
     }
 
     /// <summary>
@@ -56,40 +67,53 @@ public class CollectionController : ControllerBase
     [HttpPost("sync")]
     public async Task<IActionResult> SyncAll([FromBody] List<CollectionSubmitDto> records)
     {
-        foreach (var dto in records)
+        try
         {
-            var supplier = await _db.Suppliers
-                .FirstOrDefaultAsync(s => s.BarcodeRef == dto.SupplierId);
-
-            if (supplier == null) continue;
-
-            supplier.Status = "Collected";
-
-            var existing = await _db.CollectionRecords
-                .FirstOrDefaultAsync(r => r.SupplierId == dto.SupplierId);
-
-            if (existing != null)
+            foreach (var dto in records)
             {
-                existing.ClearKg = dto.ClearKg;
-                existing.ColouredKg = dto.ColouredKg;
-                existing.Condition = dto.Condition;
-                existing.Synced = true;
-            }
-            else
-            {
-                _db.CollectionRecords.Add(new CollectionRecord
+                var supplier = await _db.Suppliers
+                    .FirstOrDefaultAsync(s => s.BarcodeRef == dto.SupplierId);
+
+                if (supplier == null) continue;
+
+                supplier.Status = "Collected";
+
+                // FIX: Always use UTC DateTime
+                var timestamp = dto.Timestamp == default 
+                    ? DateTime.UtcNow 
+                    : DateTime.SpecifyKind(dto.Timestamp, DateTimeKind.Utc);
+
+                var existing = await _db.CollectionRecords
+                    .FirstOrDefaultAsync(r => r.SupplierId == dto.SupplierId);
+
+                if (existing != null)
                 {
-                    SupplierId = dto.SupplierId,
-                    ClearKg = dto.ClearKg,
-                    ColouredKg = dto.ColouredKg,
-                    Condition = dto.Condition,
-                    Timestamp = dto.Timestamp == default ? DateTime.UtcNow : dto.Timestamp,
-                    Synced = true,
-                });
+                    existing.ClearKg = dto.ClearKg;
+                    existing.ColouredKg = dto.ColouredKg;
+                    existing.Condition = dto.Condition;
+                    existing.Timestamp = timestamp;
+                    existing.Synced = true;
+                }
+                else
+                {
+                    _db.CollectionRecords.Add(new CollectionRecord
+                    {
+                        SupplierId = dto.SupplierId,
+                        ClearKg = dto.ClearKg,
+                        ColouredKg = dto.ColouredKg,
+                        Condition = dto.Condition,
+                        Timestamp = timestamp,
+                        Synced = true,
+                    });
+                }
             }
-        }
 
-        await _db.SaveChangesAsync();
-        return Ok(new { message = "Sync complete", count = records.Count });
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Sync complete", count = records.Count });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+        }
     }
 }
