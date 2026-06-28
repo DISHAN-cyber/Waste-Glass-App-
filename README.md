@@ -9,6 +9,11 @@ A comprehensive mobile application for managing waste glass collection routes, f
 
 ---
 ## 📱 App live demo
+
+
+https://github.com/user-attachments/assets/c47ccba1-1a2e-4dd0-80d5-3b3090c071ba
+
+
 ## 📱 Project Overview
 
 This application streamlines the waste glass collection process by providing collectors with an optimized daily route, barcode-based supplier verification, and seamless data management. The app works offline-first using SQLite and syncs data when connectivity is available.
