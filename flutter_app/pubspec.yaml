@@ -1,6 +1,5 @@
 name: waste_glass_app
 description: Waste Glass Collection App
-
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,19 +9,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.1.0
-  mobile_scanner: ^3.5.6
-  sqflite: ^2.3.0
-  path: ^1.8.3
-  path_provider: ^2.1.1
-  intl: ^0.18.1
-  geolocator: ^10.1.0
-  permission_handler: ^11.0.1
+  http: ^1.2.0
+  mobile_scanner: ^6.0.2
+  sqflite: ^2.4.1
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  intl: ^0.19.0
+  geolocator: ^13.0.1
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: "^0.14.1"
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "icon.png"

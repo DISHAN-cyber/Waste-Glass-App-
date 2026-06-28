@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/supplier.dart';
 import '../services/api_service.dart';
 import '../services/local_db_service.dart';
@@ -22,6 +23,7 @@ class _ScanCollectScreenState extends State<ScanCollectScreen> {
   bool _scanned = false;
   bool _formUnlocked = false;
   bool _submitting = false;
+  bool _cameraReady = false;
   String? _scanError;
 
   final _clearKgController = TextEditingController();
@@ -34,7 +36,27 @@ class _ScanCollectScreenState extends State<ScanCollectScreen> {
   @override
   void initState() {
     super.initState();
-    _scannerController = MobileScannerController();
+    _initScanner();
+  }
+
+  Future<void> _initScanner() async {
+    final status = await Permission.camera.request();
+    
+    if (status != PermissionStatus.granted) {
+      setState(() {
+        _scanError = 'Camera permission denied. Please enable it in Settings.';
+      });
+      return;
+    }
+
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal,
+      facing: CameraFacing.back,
+    );
+
+    setState(() {
+      _cameraReady = true;
+    });
   }
 
   @override
@@ -82,14 +104,11 @@ class _ScanCollectScreenState extends State<ScanCollectScreen> {
       timestamp: DateTime.now(),
     );
 
-    // Always save locally first (offline-first)
     await LocalDbService().saveCollection(record);
 
-    // Try to post to backend
     try {
       await ApiService.submitCollection(record);
     } catch (e) {
-      // Saved locally — will sync later from Screen 3
       debugPrint('Backend post failed, saved locally: $e');
     }
 
@@ -217,17 +236,29 @@ class _ScanCollectScreenState extends State<ScanCollectScreen> {
                 borderRadius: BorderRadius.circular(8),
                 child: SizedBox(
                   height: 260,
-                  child: MobileScanner(
-                    controller: _scannerController,
-                    onDetect: _onBarcodeDetected,
-                    overlay: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      margin: const EdgeInsets.all(60),
-                    ),
-                  ),
+                  child: _cameraReady
+                      ? Stack(
+                          children: [
+                            MobileScanner(
+                              controller: _scannerController!,
+                              onDetect: _onBarcodeDetected,
+                            ),
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                child: Container(
+                                  margin: const EdgeInsets.all(60),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.white, width: 2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : const Center(
+                          child: CircularProgressIndicator(),
+                        ),
                 ),
               ),
               const SizedBox(height: 16),

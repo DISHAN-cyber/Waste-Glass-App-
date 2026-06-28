@@ -194,82 +194,82 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
   }
 
   Widget _buildStopCard(Supplier supplier, int index) {
-    final isNext = supplier.status == 'Next';
-    final isCollected = supplier.status == 'Collected';
+  final isNext = supplier.status == 'Next';
+  final isCollected = supplier.status == 'Collected';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isNext ? const Color(0xFF1565C0) : Colors.grey.shade200,
-          width: isNext ? 2 : 1,
-        ),
+  return Container(
+    margin: const EdgeInsets.only(bottom: 10),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: isNext ? const Color(0xFF1565C0) : Colors.grey.shade200,
+        width: isNext ? 2 : 1,
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: isCollected
-              ? Colors.green.shade50
-              : isNext
-                  ? const Color(0xFFE3F2FD)
-                  : Colors.grey.shade100,
-          child: Text(
-            '${index + 1}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: _statusColor(supplier.status),
-            ),
-          ),
-        ),
-        title: Text(
-          supplier.name,
+    ),
+    child: ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: CircleAvatar(
+        backgroundColor: isCollected
+            ? Colors.green.shade50
+            : isNext
+                ? const Color(0xFFE3F2FD)
+                : Colors.grey.shade100,
+        child: Text(
+          '${index + 1}',
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            decoration: isCollected ? TextDecoration.lineThrough : null,
-            color: isCollected ? Colors.grey : Colors.black87,
+            fontWeight: FontWeight.bold,
+            color: _statusColor(supplier.status),
           ),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(supplier.address,
-                style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                _pill('${supplier.expectedKg} kg expected',
-                    Colors.orange.shade100, Colors.orange.shade800),
-                const SizedBox(width: 6),
-                if (supplier.distanceFromPrev > 0)
-                  _pill('${supplier.distanceFromPrev.toStringAsFixed(1)} km',
-                      Colors.grey.shade100, Colors.grey.shade700),
-              ],
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(_statusIcon(supplier.status),
-                color: _statusColor(supplier.status)),
-            const SizedBox(height: 2),
-            Text(
-              supplier.status,
-              style: TextStyle(
-                fontSize: 10,
-                color: _statusColor(supplier.status),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        onTap: isNext ? () => _goToScan(supplier) : null,
       ),
-    );
-  }
+      title: Text(
+        supplier.name,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          decoration: isCollected ? TextDecoration.lineThrough : null,
+          color: isCollected ? Colors.grey : Colors.black87,
+        ),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          Text(supplier.address,
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              _pill('${supplier.expectedKg} kg expected',
+                  Colors.orange.shade100, Colors.orange.shade800),
+              const SizedBox(width: 6),
+              if (supplier.distanceFromPrev > 0)
+                _pill('${supplier.distanceFromPrev.toStringAsFixed(1)} km',
+                    Colors.grey.shade100, Colors.grey.shade700),
+            ],
+          ),
+        ],
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(_statusIcon(supplier.status),
+              color: _statusColor(supplier.status)),
+          const SizedBox(height: 2),
+          Text(
+            supplier.status,
+            style: TextStyle(
+              fontSize: 10,
+              color: _statusColor(supplier.status),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+      onTap: () => _goToScan(supplier),  // ✅ CHANGED: Now any supplier can be tapped!
+    ),
+  );
+}
 
   Widget _pill(String text, Color bg, Color fg) {
     return Container(
