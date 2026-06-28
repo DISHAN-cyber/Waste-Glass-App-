@@ -266,7 +266,7 @@ class _TripSequenceScreenState extends State<TripSequenceScreen> {
           ),
         ],
       ),
-      onTap: () => _goToScan(supplier),  // ✅ CHANGED: Now any supplier can be tapped!
+      onTap: () => _goToScan(supplier),  
     ),
   );
 }
