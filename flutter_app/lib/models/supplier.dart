@@ -6,7 +6,7 @@ class Supplier {
   final double longitude;
   final double expectedKg;
   final String barcodeRef;
-  String status; // Pending, Next, Collected
+  String status; 
   final int stopOrder;
   final double distanceFromPrev;
 
